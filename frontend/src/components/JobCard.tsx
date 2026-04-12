@@ -1,5 +1,7 @@
 import { Job } from '../types';
 import { Draggable } from '@hello-pangea/dnd';
+import { useBoardStore } from '../store/useBoardStore';
+import { selectSetSelectedJob } from '../store/selectors';
 
 interface JobCardProps {
   job: Job;
@@ -11,6 +13,8 @@ const JobCard = ({ job, index }: JobCardProps) => {
     month: 'short',
     day: 'numeric',
   });
+  
+  const setSelectedJob = useBoardStore(selectSetSelectedJob);
 
   return (
     <Draggable draggableId={job.id} index={index}>
@@ -20,10 +24,12 @@ const JobCard = ({ job, index }: JobCardProps) => {
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
+          onClick={() => setSelectedJob(job.id)}
           style={{ 
             borderLeft: `3px solid var(--status-${job.status})`,
             ...provided.draggableProps.style,
-            opacity: snapshot.isDragging ? 0.8 : 1
+            opacity: snapshot.isDragging ? 0.8 : 1,
+            cursor: 'pointer'
           }}
         >
           <div className="job-company">{job.company}</div>

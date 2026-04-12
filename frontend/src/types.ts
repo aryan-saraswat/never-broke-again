@@ -19,4 +19,5 @@ export interface Column {
 export interface BoardState {
   columns: Record<ColumnId, Column>;
   jobs: Record<string, Job>;
+  selectedJobId: string | null;
 }

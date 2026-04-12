@@ -6,6 +6,7 @@ export interface BoardStore extends BoardState {
   updateJob: (id: string, updates: Partial<Job>) => void;
   deleteJob: (id: string) => void;
   moveJob: (jobId: string, fromColumn: ColumnId, toColumn: ColumnId, toIndex: number) => void;
+  setSelectedJob: (id: string | null) => void;
 }
 
 const initialData: BoardState = {
@@ -41,10 +42,13 @@ const initialData: BoardState = {
       notes: 'Technical screen on Friday',
     },
   },
+  selectedJobId: null,
 };
 
 export const useBoardStore = create<BoardStore>((set) => ({
   ...initialData,
+
+  setSelectedJob: (id) => set({ selectedJobId: id }),
 
   addJob: (jobData) => set((state) => {
     const newId = crypto.randomUUID();

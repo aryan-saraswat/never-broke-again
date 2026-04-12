@@ -319,3 +319,143 @@ button {
 .btn-secondary:hover {
   background-color: var(--border-color);
 }
+
+/* Job Details Panel */
+.job-details-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  animation: fadeIn 0.3s ease;
+}
+
+.job-details-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 100%;
+  max-width: 450px;
+  height: 100vh;
+  background-color: var(--bg-primary);
+  border-left: 1px solid var(--border-color);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.5);
+  z-index: 1001;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.job-details-panel.open {
+  transform: translateX(0);
+}
+
+.job-details-close {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 2rem;
+  line-height: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  align-self: flex-end;
+  cursor: pointer;
+  transition: color 0.2s;
+  margin-top: var(--spacing-md);
+  margin-right: var(--spacing-md);
+}
+
+.job-details-close:hover {
+  color: var(--text-primary);
+}
+
+.job-details-content {
+  padding: 0 var(--spacing-xl) var(--spacing-xl);
+  overflow-y: auto;
+  flex: 1;
+}
+
+.job-details-content h2 {
+  font-size: 1.8rem;
+  margin-bottom: var(--spacing-xs);
+  margin-top: 0;
+}
+
+.job-role-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.job-role-status h3 {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.status-badge {
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  background-color: var(--bg-tertiary);
+}
+
+.status-badge.status-wishlist { border: 1px solid var(--status-wishlist); color: var(--status-wishlist); }
+.status-badge.status-applied { border: 1px solid var(--status-applied); color: var(--status-applied); }
+.status-badge.status-interview { border: 1px solid var(--status-interview); color: var(--status-interview); }
+.status-badge.status-offer { border: 1px solid var(--status-offer); color: var(--status-offer); }
+.status-badge.status-rejected { border: 1px solid var(--status-rejected); color: var(--status-rejected); }
+
+.job-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.job-section h4 {
+  font-size: 0.9rem;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--spacing-xs);
+}
+
+.job-section p {
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+
+.job-notes {
+  background-color: var(--bg-secondary);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  min-height: 100px;
+}
+
+.job-details-empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  color: var(--text-tertiary);
+  font-size: 1.2rem;
+}
+
+.text-muted {
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

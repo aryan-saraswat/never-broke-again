@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Board from './components/Board';
 import AddJobModal from './components/AddJobModal';
+import JobDetailsPanel from './components/JobDetailsPanel';
 
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,6 +19,7 @@ function App() {
       </main>
       
       {isModalOpen && <AddJobModal onClose={() => setIsModalOpen(false)} />}
+      <JobDetailsPanel />
     </div>
   );
 }
