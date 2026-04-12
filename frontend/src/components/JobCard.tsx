@@ -1,4 +1,3 @@
-import React from 'react';
 import { Job } from '../types';
 import { Draggable } from '@hello-pangea/dnd';
 
@@ -7,7 +6,7 @@ interface JobCardProps {
   index: number;
 }
 
-const JobCard: React.FC<JobCardProps> = ({ job, index }) => {
+const JobCard = ({ job, index }: JobCardProps) => {
   const formattedDate = new Date(job.dateApplied).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',

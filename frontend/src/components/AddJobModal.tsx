@@ -6,7 +6,7 @@ interface AddJobModalProps {
   onClose: () => void;
 }
 
-const AddJobModal: React.FC<AddJobModalProps> = ({ onClose }) => {
+const AddJobModal = ({ onClose }: AddJobModalProps) => {
   const addJob = useBoardStore((state) => state.addJob);
   const [formData, setFormData] = useState({
     company: '',

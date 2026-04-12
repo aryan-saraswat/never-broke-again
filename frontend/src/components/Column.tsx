@@ -1,4 +1,3 @@
-import React from 'react';
 import JobCard from './JobCard';
 import { useBoardStore } from '../store/useBoardStore';
 import { ColumnId } from '../types';
@@ -8,7 +7,7 @@ interface ColumnProps {
   id: ColumnId;
 }
 
-const Column: React.FC<ColumnProps> = ({ id }) => {
+const Column = ({ id }: ColumnProps) => {
   const column = useBoardStore((state) => state.columns[id]);
   const jobs = useBoardStore((state) => state.jobs);
 
