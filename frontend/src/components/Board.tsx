@@ -1,20 +1,18 @@
+import { useBoardStore } from "../store/useBoardStore";
 import Column from "./Column";
 
-// Placeholder data for Phase 1
-const COLUMNS = [
-  { id: 'wishlist', title: 'Wishlist' },
-  { id: 'applied', title: 'Applied' },
-  { id: 'interview', title: 'Interviewing' },
-  { id: 'offer', title: 'Offer' },
-  { id: 'rejected', title: 'Rejected' },
-];
+const COLUMN_ORDER = ['wishlist', 'applied', 'interview', 'offer', 'rejected'] as const;
 
 const Board = () => {
+  const columns = useBoardStore((state) => state.columns);
+
   return (
     <div className="board-container">
-      {COLUMNS.map((col) => (
-        <Column key={col.id} title={col.title} id={col.id} />
-      ))}
+      {COLUMN_ORDER.map((columnId) => {
+        const col = columns[columnId];
+        if (!col) return null;
+        return <Column key={col.id} id={col.id} />;
+      })}
     </div>
   );
 };

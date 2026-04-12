@@ -1,23 +1,30 @@
 import React from 'react';
 import JobCard from './JobCard';
+import { useBoardStore } from '../store/useBoardStore';
+import { ColumnId } from '../types';
 
 interface ColumnProps {
-  id: string;
-  title: string;
+  id: ColumnId;
 }
 
-const Column: React.FC<ColumnProps> = ({ id, title }) => {
+const Column: React.FC<ColumnProps> = ({ id }) => {
+  const column = useBoardStore((state) => state.columns[id]);
+  const jobs = useBoardStore((state) => state.jobs);
+
+  if (!column) return null;
+
   return (
     <div className="column">
       <div className="column-header">
-        <h3>{title}</h3>
-        <span className="column-count">3</span>
+        <h3>{column.title}</h3>
+        <span className="column-count">{column.jobIds.length}</span>
       </div>
       <div className="column-content">
-        {/* Placeholder cards */}
-        <JobCard company="Google" role="Frontend Engineer" date="2d ago" statusId={id} />
-        <JobCard company="Stripe" role="React Developer" date="4d ago" statusId={id} />
-        <JobCard company="Airbnb" role="UI Engineer" date="1w ago" statusId={id} />
+        {column.jobIds.map((jobId) => {
+          const job = jobs[jobId];
+          if (!job) return null;
+          return <JobCard key={job.id} job={job} />;
+        })}
       </div>
     </div>
   );
