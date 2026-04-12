@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { BoardState, ColumnId, Job } from '../types';
 
-interface BoardStore extends BoardState {
+export interface BoardStore extends BoardState {
   addJob: (job: Omit<Job, 'id'>) => void;
   updateJob: (id: string, updates: Partial<Job>) => void;
   deleteJob: (id: string) => void;

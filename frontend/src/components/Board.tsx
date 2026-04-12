@@ -1,13 +1,14 @@
 import { DragDropContext, DropResult } from "@hello-pangea/dnd";
 import { useBoardStore } from "../store/useBoardStore";
+import { selectColumns, selectMoveJob } from "../store/selectors";
 import { ColumnId } from "../types";
 import Column from "./Column";
 
 const COLUMN_ORDER = ['wishlist', 'applied', 'interview', 'offer', 'rejected'] as const;
 
 const Board = () => {
-  const columns = useBoardStore((state) => state.columns);
-  const moveJob = useBoardStore((state) => state.moveJob);
+  const columns = useBoardStore(selectColumns);
+  const moveJob = useBoardStore(selectMoveJob);
 
   const onDragEnd = (result: DropResult) => {
     const { destination, source, draggableId } = result;

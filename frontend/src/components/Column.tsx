@@ -1,5 +1,6 @@
 import JobCard from './JobCard';
 import { useBoardStore } from '../store/useBoardStore';
+import { selectJobs, selectColumnById } from '../store/selectors';
 import { ColumnId } from '../types';
 import { Droppable } from '@hello-pangea/dnd';
 
@@ -8,8 +9,8 @@ interface ColumnProps {
 }
 
 const Column = ({ id }: ColumnProps) => {
-  const column = useBoardStore((state) => state.columns[id]);
-  const jobs = useBoardStore((state) => state.jobs);
+  const column = useBoardStore(selectColumnById(id));
+  const jobs = useBoardStore(selectJobs);
 
   if (!column) return null;
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useBoardStore } from '../store/useBoardStore';
+import { selectAddJob } from '../store/selectors';
 import { ColumnId } from '../types';
 
 interface AddJobModalProps {
@@ -7,7 +8,7 @@ interface AddJobModalProps {
 }
 
 const AddJobModal = ({ onClose }: AddJobModalProps) => {
-  const addJob = useBoardStore((state) => state.addJob);
+  const addJob = useBoardStore(selectAddJob);
   const [formData, setFormData] = useState({
     company: '',
     role: '',
