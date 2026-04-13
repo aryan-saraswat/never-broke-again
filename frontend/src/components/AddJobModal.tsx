@@ -15,6 +15,7 @@ const AddJobModal = ({ onClose }: AddJobModalProps) => {
     status: 'wishlist' as ColumnId,
     salary: '',
     notes: '',
+    link: '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -90,7 +91,16 @@ const AddJobModal = ({ onClose }: AddJobModalProps) => {
               value={formData.notes}
               onChange={(e) => setFormData({...formData, notes: e.target.value})}
               placeholder="Any additional info..."
-              rows={3}
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="link">Job Link (optional)</label>
+            <input 
+              id="link"
+              type="url" 
+              value={formData.link}
+              onChange={(e) => setFormData({...formData, link: e.target.value})}
+              placeholder="e.g. https://careers.google.com/..."
             />
           </div>
           <div className="modal-actions">

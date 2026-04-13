@@ -36,6 +36,20 @@ const JobDetailsPanel = () => {
               <p>{new Date(job.dateApplied).toLocaleDateString('en-US', { dateStyle: 'medium' })}</p>
             </div>
 
+            {job.link && (
+              <div className="job-section">
+                <h4>Job Link</h4>
+                <a 
+                  href={job.link} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  style={{ color: 'var(--accent-primary)', textDecoration: 'underline' }}
+                >
+                  Open Job Posting
+                </a>
+              </div>
+            )}
+
             {job.salary && (
               <div className="job-section">
                 <h4>Salary Range</h4>

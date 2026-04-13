@@ -8,6 +8,7 @@ export interface Job {
   dateApplied: string; // ISO date string
   salary?: string;
   notes?: string;
+  link?: string;
 }
 
 export interface Column {
