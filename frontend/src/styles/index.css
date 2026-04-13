@@ -459,3 +459,30 @@ button {
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
+/* Auth Screen */
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bg-primary);
+  z-index: 2000;
+}
+
+.auth-panel {
+  width: 100%;
+  max-width: 400px;
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-panel h2 {
+  font-size: 1.8rem;
+  margin-bottom: var(--spacing-xl);
+  text-align: center;
+}
+

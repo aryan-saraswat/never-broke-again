@@ -2,104 +2,189 @@ import { create } from 'zustand';
 import { BoardState, ColumnId, Job } from '../types';
 
 export interface BoardStore extends BoardState {
-  addJob: (job: Omit<Job, 'id'>) => void;
-  updateJob: (id: string, updates: Partial<Job>) => void;
-  deleteJob: (id: string) => void;
-  moveJob: (jobId: string, fromColumn: ColumnId, toColumn: ColumnId, toIndex: number) => void;
+  token: string | null;
+  setToken: (token: string | null) => void;
+  loginUser: (email: string, password: string) => Promise<void>;
+  registerUser: (email: string, password: string) => Promise<void>;
+  logoutUser: () => void;
+  fetchJobs: () => Promise<void>;
+  addJob: (job: Omit<Job, 'id'>) => Promise<void>;
+  updateJob: (id: string, updates: Partial<Job>) => Promise<void>;
+  deleteJob: (id: string) => Promise<void>;
+  moveJob: (jobId: string, fromColumn: ColumnId, toColumn: ColumnId, toIndex: number) => Promise<void>;
   setSelectedJob: (id: string | null) => void;
 }
 
+const getBlankColumns = () => ({
+  wishlist: { id: 'wishlist' as ColumnId, title: 'Wishlist', jobIds: [] },
+  applied: { id: 'applied' as ColumnId, title: 'Applied', jobIds: [] },
+  interview: { id: 'interview' as ColumnId, title: 'Interviewing', jobIds: [] },
+  offer: { id: 'offer' as ColumnId, title: 'Offer', jobIds: [] },
+  rejected: { id: 'rejected' as ColumnId, title: 'Rejected', jobIds: [] },
+});
+
 const initialData: BoardState = {
-  columns: {
-    wishlist: { id: 'wishlist', title: 'Wishlist', jobIds: ['job-1'] },
-    applied: { id: 'applied', title: 'Applied', jobIds: ['job-2'] },
-    interview: { id: 'interview', title: 'Interviewing', jobIds: ['job-3'] },
-    offer: { id: 'offer', title: 'Offer', jobIds: [] },
-    rejected: { id: 'rejected', title: 'Rejected', jobIds: [] },
-  },
-  jobs: {
-    'job-1': {
-      id: 'job-1',
-      company: 'Google',
-      role: 'Senior Frontend Engineer',
-      status: 'wishlist',
-      dateApplied: new Date().toISOString(),
-      salary: '$200k - $250k',
-    },
-    'job-2': {
-      id: 'job-2',
-      company: 'Netflix',
-      role: 'UI Engineer',
-      status: 'applied',
-      dateApplied: new Date(Date.now() - 86400000).toISOString(),
-    },
-    'job-3': {
-      id: 'job-3',
-      company: 'Stripe',
-      role: 'Frontend Developer',
-      status: 'interview',
-      dateApplied: new Date(Date.now() - 86400000 * 3).toISOString(),
-      notes: 'Technical screen on Friday',
-    },
-  },
+  columns: getBlankColumns(),
+  jobs: {},
   selectedJobId: null,
 };
 
-export const useBoardStore = create<BoardStore>((set) => ({
+const API_URL = 'http://localhost:3002/api';
+
+export const useBoardStore = create<BoardStore>((set, get) => ({
   ...initialData,
+  token: localStorage.getItem('auth_token'),
+
+  setToken: (token) => {
+    if (token) {
+      localStorage.setItem('auth_token', token);
+    } else {
+      localStorage.removeItem('auth_token');
+    }
+    set({ token });
+  },
+
+  logoutUser: () => {
+    get().setToken(null);
+    set({ ...initialData });
+  },
+
+  loginUser: async (email, password) => {
+    const res = await fetch(`${API_URL}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Login failed');
+    }
+    const data = await res.json();
+    get().setToken(data.token);
+  },
+
+  registerUser: async (email, password) => {
+    const res = await fetch(`${API_URL}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Registration failed');
+    }
+    const data = await res.json();
+    get().setToken(data.token);
+  },
+
+  fetchJobs: async () => {
+    const { token } = get();
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_URL}/jobs`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) {
+        if (res.status === 401) get().logoutUser();
+        return;
+      }
+      const jobsArr: Job[] = await res.json();
+      const jobs: Record<string, Job> = {};
+      const columns = getBlankColumns();
+      
+      jobsArr.forEach(job => {
+        jobs[job.id] = job;
+        if (columns[job.status]) {
+          columns[job.status].jobIds.push(job.id);
+        }
+      });
+
+      set({ jobs, columns });
+    } catch (e) {
+      console.error(e);
+    }
+  },
 
   setSelectedJob: (id) => set({ selectedJobId: id }),
 
-  addJob: (jobData) => set((state) => {
-    const newId = crypto.randomUUID();
-    const newJob: Job = { ...jobData, id: newId };
-    
-    return {
-      jobs: { ...state.jobs, [newId]: newJob },
-      columns: {
-        ...state.columns,
-        [newJob.status]: {
-          ...state.columns[newJob.status],
-          jobIds: [newId, ...state.columns[newJob.status].jobIds],
+  addJob: async (jobData) => {
+    const { token, jobs, columns } = get();
+    const res = await fetch(`${API_URL}/jobs`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(jobData)
+    });
+    if (res.ok) {
+      const newJob: Job = await res.json();
+      set({
+        jobs: { ...jobs, [newJob.id]: newJob },
+        columns: {
+          ...columns,
+          [newJob.status]: {
+            ...columns[newJob.status],
+            jobIds: [newJob.id, ...columns[newJob.status].jobIds],
+          },
         },
+      });
+    }
+  },
+
+  updateJob: async (id, updates) => {
+    const { token, jobs } = get();
+    // Optimistic
+    const oldJob = jobs[id];
+    set({ jobs: { ...jobs, [id]: { ...oldJob, ...updates } } });
+
+    const res = await fetch(`${API_URL}/jobs/${id}`, {
+      method: 'PUT',
+      headers: { 
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
       },
-    };
-  }),
+      body: JSON.stringify(updates)
+    });
+    if (!res.ok) {
+      // Revert on fail
+      set({ jobs: { ...get().jobs, [id]: oldJob } });
+    }
+  },
 
-  updateJob: (id, updates) => set((state) => {
-    const job = state.jobs[id];
-    if (!job) return state;
+  deleteJob: async (id) => {
+    const { token, jobs, columns } = get();
+    const job = jobs[id];
+    if (!job) return;
 
-    return {
-      jobs: {
-        ...state.jobs,
-        [id]: { ...job, ...updates },
-      },
-    };
-  }),
-
-  deleteJob: (id) => set((state) => {
-    const job = state.jobs[id];
-    if (!job) return state;
-
-    const newJobs = { ...state.jobs };
+    // Optimistic
+    const newJobs = { ...jobs };
     delete newJobs[id];
-
-    return {
+    set({
       jobs: newJobs,
       columns: {
-        ...state.columns,
+        ...columns,
         [job.status]: {
-          ...state.columns[job.status],
-          jobIds: state.columns[job.status].jobIds.filter(jobId => jobId !== id),
+          ...columns[job.status],
+          jobIds: columns[job.status].jobIds.filter(jobId => jobId !== id),
         },
       },
-    };
-  }),
+    });
 
-  moveJob: (jobId, fromColumnId, toColumnId, toIndex) => set((state) => {
-    const fromCol = state.columns[fromColumnId];
-    const toCol = state.columns[toColumnId];
+    const res = await fetch(`${API_URL}/jobs/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!res.ok) {
+      // Simplistic revert: just refetch
+      get().fetchJobs();
+    }
+  },
+
+  moveJob: async (jobId, fromColumnId, toColumnId, toIndex) => {
+    const { token, columns, jobs } = get();
+    const fromCol = columns[fromColumnId];
+    const toCol = columns[toColumnId];
     
     // Changing column
     if (fromColumnId !== toColumnId) {
@@ -107,30 +192,41 @@ export const useBoardStore = create<BoardStore>((set) => ({
       const newToJobIds = [...toCol.jobIds];
       newToJobIds.splice(toIndex, 0, jobId);
       
-      return {
+      set({
         jobs: {
-          ...state.jobs,
-          [jobId]: { ...state.jobs[jobId], status: toColumnId },
+          ...jobs,
+          [jobId]: { ...jobs[jobId], status: toColumnId },
         },
         columns: {
-          ...state.columns,
+          ...columns,
           [fromColumnId]: { ...fromCol, jobIds: newFromJobIds },
           [toColumnId]: { ...toCol, jobIds: newToJobIds },
         },
-      };
-    }
-    
-    // Same column reordering
-    const newJobIds = [...fromCol.jobIds];
-    const currentIndex = newJobIds.indexOf(jobId);
-    newJobIds.splice(currentIndex, 1);
-    newJobIds.splice(toIndex, 0, jobId);
+      });
+      
+      // Update status in backend
+      fetch(`${API_URL}/jobs/${jobId}`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ status: toColumnId })
+      }).catch(console.error);
 
-    return {
-      columns: {
-        ...state.columns,
-        [fromColumnId]: { ...fromCol, jobIds: newJobIds },
-      },
-    };
-  }),
+    } else {
+      // Same column reordering
+      const newJobIds = [...fromCol.jobIds];
+      const currentIndex = newJobIds.indexOf(jobId);
+      newJobIds.splice(currentIndex, 1);
+      newJobIds.splice(toIndex, 0, jobId);
+
+      set({
+        columns: {
+          ...columns,
+          [fromColumnId]: { ...fromCol, jobIds: newJobIds },
+        },
+      });
+    }
+  },
 }));
