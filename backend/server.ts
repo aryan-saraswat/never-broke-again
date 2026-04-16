@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { PrismaClient } from '@prisma/client';
+import path from 'path';
 
 dotenv.config();
 
@@ -168,6 +169,18 @@ app.delete('/api/jobs/:id', async (req: Request, res: Response): Promise<void> =
     res.status(500).json({ error: 'Failed to delete job' });
   }
 });
+
+// --- SERVE FRONTEND (PRODUCTION) ---
+if (process.env.NODE_ENV === 'production') {
+  // Path assumes the file is running from backend/dist/server.js
+  const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
+  
+  app.use(express.static(frontendDistPath));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(frontendDistPath, 'index.html'));
+  });
+}
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
