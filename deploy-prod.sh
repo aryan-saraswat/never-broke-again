@@ -21,9 +21,17 @@ cd ..
 
 echo "==> Starting server with PM2..."
 cd backend
-# We set NODE_ENV to production so it triggers the static file serving logic
-NODE_ENV=production npx pm2 start dist/server.js --name "job-tracker-backend" --update-env
+
+# Start-or-restart: if the process exists, reload it (zero-downtime); otherwise start fresh
+if npx pm2 describe job-tracker-backend > /dev/null 2>&1; then
+  echo "Process exists, reloading..."
+  NODE_ENV=production npx pm2 reload job-tracker-backend --update-env
+else
+  echo "Starting for the first time..."
+  NODE_ENV=production npx pm2 start dist/server.js --name "job-tracker-backend"
+fi
+
 npx pm2 save
 
-echo "Deployment complete! Your app is now running in the background via pm2."
-echo "You can view logs with: npx pm2 logs"
+echo "Deployment complete!"
+echo "View logs with: npx pm2 logs job-tracker-backend"
