@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TrendingUp, Briefcase, MessageSquare, Award, XCircle, ArrowLeft } from 'lucide-react';
+import { useShallow } from 'zustand/react/shallow';
 import { useBoardStore } from '../store/useBoardStore';
 import { selectFunnelStats } from '../store/analyticsSelectors';
 
@@ -23,7 +24,12 @@ const FunnelBar = ({ label, count, total, color }: { label: string; count: numbe
     );
 };
 
-const StatCard = ({ icon, label, value, sub }: { icon: React.ReactNode; label: string; value: string | number; sub?: string }) => (
+const StatCard = ({ icon, label, value, sub }: {
+    icon: React.ReactNode;
+    label: string;
+    value: string | number;
+    sub?: string
+}) => (
     <div className="stat-card glass-panel">
         <div className="stat-card-icon">{icon}</div>
         <div className="stat-card-body">
@@ -36,7 +42,7 @@ const StatCard = ({ icon, label, value, sub }: { icon: React.ReactNode; label: s
 
 const AnalyticsPage = () => {
     const navigate = useNavigate();
-    const stats = useBoardStore(selectFunnelStats);
+    const stats = useBoardStore(useShallow(selectFunnelStats));
 
     const {
         totalApplied,
@@ -53,7 +59,8 @@ const AnalyticsPage = () => {
 
     return (
         <div className="analytics-page">
-            <header className="app-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <header className="app-header"
+                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <button className="btn-secondary icon-btn" onClick={() => navigate('/')}>
                         <ArrowLeft size={16} />
@@ -103,12 +110,25 @@ const AnalyticsPage = () => {
 
                         <section className="analytics-section">
                             <h2 className="analytics-section-title">Application Funnel</h2>
-                            <p className="analytics-section-desc">How your applications progress through each stage, as a share of total applied.</p>
+                            <p className="analytics-section-desc">How your applications progress through each stage, as
+                                a share of total applied.</p>
                             <div className="funnel-chart glass-panel">
-                                <FunnelBar label="Applied" count={totalApplied} total={totalApplied} color="var(--status-applied)" />
-                                <FunnelBar label="Interviewing" count={totalInterviews} total={totalApplied} color="var(--status-interview)" />
-                                <FunnelBar label="Offer" count={totalOffers} total={totalApplied} color="var(--status-offer)" />
-                                <FunnelBar label="Rejected" count={totalRejected} total={totalApplied} color="var(--status-rejected)" />
+                                <FunnelBar label="Applied"
+                                           count={totalApplied}
+                                           total={totalApplied}
+                                           color="var(--status-applied)" />
+                                <FunnelBar label="Interviewing"
+                                           count={totalInterviews}
+                                           total={totalApplied}
+                                           color="var(--status-interview)" />
+                                <FunnelBar label="Offer"
+                                           count={totalOffers}
+                                           total={totalApplied}
+                                           color="var(--status-offer)" />
+                                <FunnelBar label="Rejected"
+                                           count={totalRejected}
+                                           total={totalApplied}
+                                           color="var(--status-rejected)" />
                             </div>
                         </section>
 
@@ -116,7 +136,9 @@ const AnalyticsPage = () => {
                             <h2 className="analytics-section-title">Conversion Rates</h2>
                             <div className="conversion-cards">
                                 <div className="conversion-card glass-panel">
-                                    <div className="conversion-value" style={{ color: 'var(--status-interview)' }}>{interviewRate}%</div>
+                                    <div className="conversion-value"
+                                         style={{ color: 'var(--status-interview)' }}>{interviewRate}%
+                                    </div>
                                     <div className="conversion-label">Applied → Interview</div>
                                     <div className="conversion-sub">{totalInterviews} of {totalApplied} applications</div>
                                 </div>
@@ -130,7 +152,9 @@ const AnalyticsPage = () => {
                                 </div>
                                 <div className="conversion-arrow">→</div>
                                 <div className="conversion-card glass-panel">
-                                    <div className="conversion-value" style={{ color: 'var(--accent-primary)' }}>{offerRate}%</div>
+                                    <div className="conversion-value"
+                                         style={{ color: 'var(--accent-primary)' }}>{offerRate}%
+                                    </div>
                                     <div className="conversion-label">Overall Offer Rate</div>
                                     <div className="conversion-sub">{totalOffers} of {totalApplied} applications</div>
                                 </div>
